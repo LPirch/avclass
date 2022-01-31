@@ -15,6 +15,8 @@ import evaluate_clustering as ec
 import json
 import traceback
 import gzip
+from zipfile import ZipFile
+from io import BytesIO
 
 # Default tagging file
 default_tag_file = os.path.join(script_dir, "data/default.tagging")
@@ -60,6 +62,34 @@ def list_str(l, sep=", ", prefix=""):
     for s in l[1:]:
         out = out + sep + s
     return out
+
+
+class ZipInput():
+    def __init__(self, ifile):
+        self.ifile = ifile
+
+    def __iter__(self):
+        self.z = ZipFile(self.ifile, 'r')
+        self.files = self.z.namelist()
+        self.i = 0
+        return self
+
+    def __next__(self):
+        return self.read()
+
+    def read(self):
+        if self.i < len(self.files):
+            with self.z.open(self.files[self.i]) as f:
+                with BytesIO(f.read()) as buf:
+                    content = buf.getvalue().decode()
+            content = ' '.join(content.splitlines())
+            self.i += 1
+            return content
+        raise StopIteration
+
+    def close(self):
+        self.z.close()
+
 
 def main(args):
     # Select hash used to identify sample, by default MD5
@@ -123,6 +153,8 @@ def main(args):
         # Open file
         if args.gzip:
             fd = gzip.open(ifile, 'rt')
+        elif ifile.endswith('.zip'):
+            fd = ZipInput(ifile)
         else:
             fd = open(ifile, 'r')
 
