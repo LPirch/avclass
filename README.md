@@ -1,5 +1,7 @@
 # AVClass and AVClass2
 
+This is a fork of AVClass/AVClass2 with a minimal patch to support zip files as input for AVClass2.
+
 AVClass and AVClass2 are Python tools to tag / label malware samples. 
 You give them as input the AV labels for a large number of malware samples (e.g., VirusTotal JSON reports) 
 and they output tags extracted from the AV labels of each sample. 
